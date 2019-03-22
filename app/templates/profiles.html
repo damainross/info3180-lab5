@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+
+
+{% block main%}
+
+{% block css %}
+
+{% endblock %}
+<h1>Profiles</h1>
+<br>
+<br>
+
+    
+          
+
+            {% for user in user %}
+
+                
+                    
+                <form    action ='{{url_for('profile_detail',user_id=user.id)}}' >
+ 
+                    <div class ='main_div'  rel="stylesheet" href="{{ url_for('static',
+                     filename='profile.css') }}" > 
+                     
+                    <div class='sex_location'>
+                    <h4>{{ user.f_name}} {{ user.l_name}}</h4>
+                    <br>
+                     
+                    {{ user.gender}}
+
+                    <h4>{{ user.location}}</h4>
+                    </div>
+                    
+                    
+                    
+                     
+            <div class='image'>      <img src= '{{url_for('static',filename ='uploads/file{0}'.format(user.id)    )}}' /> </div>
+
+                    
+                    <button type="submit" name="submit" class="btn btn-primary" >view profile</button>
+
+                    
+                    
+                    </form>
+                    </div>
+                    <br>
+
+
+
+               
+
+            {% endfor %}
+
+        
+
+{% endblock %}

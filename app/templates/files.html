@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block main %}
+ 
+<link rel="stylesheet" href="{{ url_for('static',filename="css/grid.css") }}"/>
+<div class='grid'>
+
+{%for x in images%} 
+<div class='gridi'>  <img src= '{{url_for('static',filename="uploads/"+x)}}'/>  </div>
+  
+{%endfor%}
+
+</div>
+{% endblock %}

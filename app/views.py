@@ -1,21 +1,50 @@
-"""
-Flask Documentation:     http://flask.pocoo.org/docs/
-Jinja2 Documentation:    http://jinja.pocoo.org/2/documentation/
-Werkzeug Documentation:  http://werkzeug.pocoo.org/documentation/
-This file creates your application.
-"""
+#import os
+#from app import app
 
-from app import app, db, login_manager
-from flask import render_template, request, redirect, url_for, flash
-from flask_login import login_user, logout_user, current_user, login_required
-from app.forms import LoginForm
-from app.models import UserProfile
-from werkzeug.security import check_password_hash
+#from werkzeug import secure_filename
+#from flask import render_template, request, redirect, url_for, flash,jsonify
+#from app.Model import User
+#from .  import db
+#from .form import create_profile
+#from app import  db
 
 
-###
-# Routing for your application.
-###
+from app import app
+
+from flask import render_template, request, redirect, url_for,flash
+
+from app import db
+
+from app.Model import User
+
+from flask import jsonify, session
+
+from datetime import *
+
+from  .form import create_profile
+
+import json
+
+from flask import Response
+
+from werkzeug import secure_filename
+
+import os
+
+
+
+
+
+
+
+
+
+
+
+ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
+
+ 
+
 
 @app.route('/')
 def home():
@@ -23,80 +52,129 @@ def home():
     return render_template('home.html')
 
 
-@app.route('/about/')
-def about():
-    """Render the website's about page."""
-    return render_template('about.html')
 
 
-@app.route("/login", methods=["GET", "POST"])
-def login():
-    form = LoginForm()
-    if form.validate_on_submit():
-        # change this to actually validate the entire form submission
-        # and not just one field
-        if form.username.data:
-            username = form.username.data
-            password = form.password.data
-            # Get the username and password values from the form.
+#def allowed_file(filename):
 
-            # using your model, query database for a user based on the username
-            user = UserProfile.query.filter_by(username=username).first()
-            if user is not None and check_password_hash(user.password, password):
-                user  = db.session.query(UserProfile).all()
-            # and password submitted. Remember you need to compare the password hash.
-            # You will need to import the appropriate function to do so.
-            # Then store the result of that query to a `user` variable so it can be
-            # passed to the login_user() method below.
+    #return '.' in filename and \
 
-            # get user id, load into session
-                login_user(user)
-                flash('Logged in successfully')
-                #return render_template("login.html", form=form)
-            # remember to flash a message to the user
-                return redirect(url_for("secure_page")) 
-       # return redirect(url_for('home'))  # they should be redirected to a secure-page route instead
-    return render_template("login.html", form=form)
+           #filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
+           
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+           
+           
+           
+           
+@app.route('/profile',methods=['GET', 'POST'])
+def profile():
+  form = create_profile()
+  #if request.method=='POST' and form.validate_on_submit():
+      ##write to database
+      
+  if request.method == 'POST':
+        
+        if form.validate_on_submit():
+            
+   
+            #form = create_profile(request.form)
+            #id = form.username.data
+            im = request.files['profile_picture']
+            u = User(form.f_name.data,
+            form.l_name.data,
+            form.email.data,
+            form.location.data,
+            form.biography.data,
+            form.gender.data,
+            im.filename)
+            #sex=form.gender.data
+            db.session.add(u)
+            db.session.commit()
+            
+            #uploaded_file = request.files['image']
+            file = request.files['profile_picture']
+            #fille = secure_filename(file.filename)
+            if  file  and  allowed_file(file.filename):
+                
+                filename = 'file{0}'.format(
+                    #this simply affilates each uploaded photo to the userid of the 'owner' of the photo 
+                        u.id)
+                f=secure_filename(filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'],
 
+                                                    f))
 
-# user_loader callback. This callback is used to reload the user object from
-# the user ID stored in the session
-@app.route('/secure-page')
-@login_required
-def secure_page():
-    return render_template('secure_page.html')
-@login_manager.user_loader
-def load_user(id):
-    return UserProfile.query.get(int(id))
+                u.profile_picture = filename
 
-###
-# The functions below should be applicable to all Flask apps.
-###
-
-
-@app.route('/<file_name>.txt')
-def send_text_file(file_name):
-    """Send your static text file."""
-    file_dot_text = file_name + '.txt'
-    return app.send_static_file(file_dot_text)
-
-
-@app.after_request
-def add_header(response):
-    """
-    Add headers to both force latest IE rendering engine or Chrome Frame,
-    and also to cache the rendered page for 10 minutes.
-    """
-    response.headers['X-UA-Compatible'] = 'IE=Edge,chrome=1'
-    response.headers['Cache-Control'] = 'public, max-age=0'
-    return response
+                db.session.commit()
+                flash('successfully created')
+                return redirect(url_for('profiles'))
 
 
-@app.errorhandler(404)
-def page_not_found(error):
-    """Custom 404 page."""
-    return render_template('404.html'), 404
+
+      
+  return render_template('new_profile.html',form=form)
+  
+@app.route('/profiles', methods=['GET', 'POST'])
+
+def profiles():
+
+    #users = User.query.all()
+    users = db.session.query(User).all()
+
+#users:#request.method == 'POST' and 
+    if 1==1:#request.headers['Content-Type'] == 'application/json':
+        #users = User.query.all()
+        
+        users_from_db = {}
+
+        for user in users_from_db:
+            #add users to dict
+            users_from_db.update({
+
+                'name': user.f_name+' '+user.l_name,
+
+                'location': user.location
+
+            })
+        users_from_db.update({'name':'the','location':'somewhere'})
+
+        #return jsonify(users_from_db)  #return all as dictionary for ease of access of results
+    
+
+    
+    return render_template('profiles.html', user=users)
+    
+    
+    
+    
+def get_uploaded_images():
+    l=[]
+    rootdir = os.getcwd()
+    #print rootdir
+    for subdir, dirs, files in os.walk(rootdir + '/app/static/uploads'):
+        for file in files:
+           # os.path.join(subdir, file)
+            l.append(file)
+    return l
+    
+    
+    
+@app.route('/profile_detail/<int:user_id>')
+
+def profile_detail(user_id):
+
+    user = User.query.get(user_id)
 
 
-if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0", port="8080")
+
+    if not user:
+        #return redirect(url_for('home'))
+        return redirect(url_for('profiles'))
+
+
+
+    else:
+        #return redirect(url_for('home')) 
+        return render_template('profile.html', user=user)

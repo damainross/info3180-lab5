@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+
+{% block main %}
+{% include 'flash_messages.html' %} 
+
+    <div class="col-xs-5">
+
+        <img src='{{url_for('static',filename ='uploads/file{0}'.format(user.id)    )}}' class="col-xs-12"/>
+
+    </div>
+
+    <div class="col-xs-ofset-5 col-xs-7">
+
+        <div class="alert alert-info">{{ user.f_name }} {{ user.l_name }}</div>
+        
+         <div class="alert alert-info">{{ user.email}}</div>
+          <div class="alert alert-info">{{ user.location}}</div>
+
+        <div class="alert alert-info">joined on: {{ user.created_on.strftime("%a, %d %b %Y") }}</div>
+
+        <div class="alert alert-info">
+
+        <h4>About me</h4>
+        <p>{{user.biography}}</p> 
+
+            
+
+
+        </div>
+
+    </div>
+
+{% endblock %}

@@ -1,0 +1,19 @@
+.main_div
+{
+    left: 100px;
+}
+
+.main_div .sex_location
+{
+   position: absolute;
+   left: 20px;
+   top: 5px;
+   bottom: 5px;
+}
+
+.main_div .sex_location
+{
+  position: absolute;
+  left: 20px;
+  top: 5px;
+}
